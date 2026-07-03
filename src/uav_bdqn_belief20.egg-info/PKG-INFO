@@ -1,0 +1,5 @@
+Metadata-Version: 2.4
+Name: uav-bdqn-belief20
+Version: 0.1.0
+Summary: Single UAV BDQN mission selector with local sensing and 20x20 belief memory
+Requires-Python: >=3.10

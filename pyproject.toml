@@ -1,0 +1,12 @@
+[build-system]
+requires = ["setuptools>=61"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "uav-bdqn-belief20"
+version = "0.1.0"
+description = "Single UAV BDQN mission selector with local sensing and 20x20 belief memory"
+requires-python = ">=3.10"
+
+[tool.setuptools.packages.find]
+where = ["src"]
