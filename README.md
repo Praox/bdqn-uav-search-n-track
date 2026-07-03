@@ -2,8 +2,8 @@
 
 Single-drone UAV search/track environment combining:
 
-- **BDQN mission decision** from `Praox/BDQN_mission`: the learned agent chooses only `SEARCH` or `TRACK`.
-- **20x20 belief-memory maps** inspired by `Praox/bayesian-uav-brl`: the drone only senses locally, then updates its own 20x20 memory map.
+- **BDQN mission decision** : the learned agent chooses only `SEARCH` or `TRACK`.
+- **20x20 belief-memory maps** : the drone only senses locally, then updates its own 20x20 memory map.
 
 ## Key idea
 
