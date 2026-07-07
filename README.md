@@ -107,7 +107,7 @@ python scripts/evaluate.py --checkpoint runs/latest.pt --episodes 500 --macro-st
 ```
 
 ## Dans ce repo :
-
+ 
 Environment:
     garde la vraie map cachée 20×20
 
