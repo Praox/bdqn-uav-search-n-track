@@ -163,3 +163,22 @@ python scripts/evaluate.py \
     track_success_rate_mean
     sensor_coverage_ratio_mean
     new_observed_cells_per_decision_mean
+
+```bash
+    python scripts/evaluate.py \
+  --checkpoint runs/strategic_v1/best.pt \
+  --episodes 500 \
+  --macro-steps 5 \
+  --sensor-radius 2 \
+  --max-steps 100
+
+  python scripts/train.py \
+  --episodes 500 \
+  --macro-steps 5 \
+  --sensor-radius 2 \
+  --max-steps 100 \
+  --lr 3e-5 \
+  --run-dir runs/strategic_v1
+
+  python scripts/evaluate_baseline.py --policy all --episodes 500 --macro-steps 5 --sensor-radius 2 --max-steps 100
+  ```
