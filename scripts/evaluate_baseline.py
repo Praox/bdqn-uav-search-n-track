@@ -178,7 +178,8 @@ def main() -> None:
     p.add_argument("--macro-steps", type=int, default=5)
     p.add_argument("--max-steps", type=int, default=150)
     p.add_argument("--seed", type=int, default=123)
-
+    p.add_argument("--run-dir", type=str, default="runs")
+    
     args = p.parse_args()
 
     policies = (
