@@ -58,11 +58,12 @@ def main() -> None:
         done = False
         total = 0.0
         while not done:
-            a = agent.act(obs, use_sample=False)
-            search += int(a == 0)
-            track += int(a == 1)
+            action_mask = env.action_mask()
+            action = agent.act(obs, use_sample=False, action_mask=action_mask)
+            search += int(action == 0)
+            track += int(action == 1)
             decisions += 1
-            obs, r, terminated, truncated, info = env.step(a)
+            obs, r, terminated, truncated, info = env.step(action)
             total += r
             done = terminated or truncated
         rewards.append(total)

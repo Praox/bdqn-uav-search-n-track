@@ -93,7 +93,27 @@ class SearchTrackBelief20Env:
         self.last_mission = SEARCH
         self.last_primitive_actions: list[int] = []
         return self._obs(), self._info()
+    
+    
+    def action_mask(self) -> np.ndarray:
+        """Return valid high-level actions for the current drone memory.
 
+        action 0 = SEARCH
+        action 1 = TRACK
+
+        TRACK is only valid if the drone already knows at least one
+        non-completed target in its own memory.
+        """
+        has_trackable_target = any(
+            not target.completed
+            for target in self.memory.known_targets.values()
+        )
+
+        return np.array(
+            [True, has_trackable_target],
+            dtype=bool,
+        )
+        
     def step(self, mission: int):
         assert 0 <= int(mission) < self.action_dim
         mission = int(mission)

@@ -43,12 +43,16 @@ def evaluate(agent: BDQNAgent, args, episodes: int = 20) -> dict:
         done = False
         total = 0.0
         while not done:
-            a = agent.act(obs, use_sample=False)
+            action_mask = env.action_mask()
+            a = agent.act(obs, use_sample=False, action_mask=action_mask)
+
             if a == 0:
                 search += 1
             else:
                 track += 1
+
             decisions += 1
+
             obs, r, terminated, truncated, info = env.step(a)
             total += r
             done = terminated or truncated
@@ -111,13 +115,18 @@ def main() -> None:
         done = False
         ep_reward = 0.0
         while not done:
-            action = agent.act(obs, use_sample=True)
+            action_mask = env.action_mask()
+            action = agent.act(obs, use_sample=True, action_mask=action_mask)
+
             recent_search.append(1 if action == 0 else 0)
             recent_track.append(1 if action == 1 else 0)
+
             next_obs, reward, terminated, truncated, info = env.step(action)
             done = terminated or truncated
+
             agent.replay.add(obs, action, reward, next_obs, done)
             agent.train_step()
+
             obs = next_obs
             ep_reward += reward
         recent_reward.append(ep_reward)
