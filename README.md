@@ -2,8 +2,8 @@
 
 Single-drone UAV search/track environment combining:
 
-- **BDQN mission decision** : the learned agent chooses only `SEARCH` or `TRACK`.
-- **20x20 belief-memory maps** : the drone only senses locally, then updates its own 20x20 memory map.
+- **BDQN mission decision** from `Praox/BDQN_mission`: the learned agent chooses only `SEARCH` or `TRACK`.
+- **20x20 belief-memory maps** inspired by `Praox/bayesian-uav-brl`: the drone only senses locally, then updates its own 20x20 memory map.
 
 ## Key idea
 
@@ -105,13 +105,30 @@ python scripts/train.py --episodes 500 --macro-steps 5 --sensor-radius 2
 python scripts/evaluate.py --checkpoint runs/latest.pt --episodes 100 --macro-steps 5 --sensor-radius 2
 ```
 
-## Why this is the right base for QMIX
+## Dans ce repo :
 
-Later, in QMIX:
+Environment:
+    garde la vraie map cachée 20×20
 
-```text
-Each UAV has its own 20x20 memory map.
-QMIX assigns SEARCH/TRACK to each UAV.
-Each low-level controller uses only its own UAV memory.
-The mixer can use the global state during training only.
-```
+Sensor:
+    voit seulement autour du drone
+
+DroneMemory:
+    construit belief / visited / known target map en 20×20
+
+BDQN:
+    lit DroneMemory comme input
+    choisit SEARCH ou TRACK
+
+Controller:
+    lit DroneMemory
+    transforme SEARCH/TRACK en mouvement
+
+ReplayBuffer:
+    stocke transitions pour apprendre
+
+FeatureNet:
+    transforme la map mémoire en features
+
+BayesianLinearHead:
+    donne Q_SEARCH et Q_TRACK avec incertitude bayésienne

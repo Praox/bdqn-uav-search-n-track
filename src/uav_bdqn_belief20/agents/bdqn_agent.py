@@ -87,11 +87,26 @@ class BDQNAgent:
         self.train_steps = 0
 
     @torch.no_grad()
-    def act(self, obs: np.ndarray, use_sample: bool = True) -> int:
+    def act(
+        self,
+        obs: np.ndarray,
+        use_sample: bool = True,
+        action_mask: np.ndarray | None = None,
+    ) -> int:
         x = torch.as_tensor(obs, dtype=torch.float32, device=self.device).unsqueeze(0)
+
         phi = self.feature_net(x).cpu().numpy()[0]
+
         w = self.blr.sampled_w if use_sample else self.blr.mu
         q = w @ phi
+
+        if action_mask is not None:
+            # action_mask example: [True, False]
+            # True  = action allowed
+            # False = action forbidden
+            q = q.copy()
+            q[~action_mask] = -1e9
+
         return int(np.argmax(q))
 
     def train_step(self) -> dict:
