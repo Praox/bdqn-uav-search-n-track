@@ -113,7 +113,9 @@ def main() -> None:
     parser.add_argument("--eval-episodes", type=int, default=20)
     parser.add_argument("--seed", type=int, default=42)
     parser.add_argument("--run-dir", type=str, default="runs")
-
+    parser.add_argument("--lr", type=float, default=1e-4)
+    parser.add_argument('--batch_size', type=int, default=64)
+    
     args = parser.parse_args()
 
     random.seed(args.seed)
@@ -139,6 +141,8 @@ def main() -> None:
         action_dim=env.action_dim,
         device=device,
         seed=args.seed,
+        lr=args.lr,
+        batch_size=args.batch_size,
     ))
 
     run_dir = Path(args.run_dir)

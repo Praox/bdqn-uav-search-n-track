@@ -33,12 +33,21 @@ class EnvConfig:
     step_penalty: float = -0.01
     new_cell_bonus: float = 0.01
     revisit_penalty: float = -0.005
-    detect_bonus: float = 0.50
-    track_progress_bonus: float = 0.05
-    complete_bonus: float = 2.00
+    #detect_bonus: float = 0.50
+    detect_value1_bonus: float = 0.30
+    detect_value2_bonus: float = 1.00
+    #track_progress_bonus: float = 0.05
+    track_progress_value1_bonus: float = 0.03
+    track_progress_value2_bonus: float = 0.12
+    #complete_bonus: float = 2.00
+    complete_value1_bonus: float = 2.0
+    complete_value2_bonus: float = 8.0
+    
     all_targets_bonus: float = 3.00
     boundary_penalty: float = -0.05
     unknown_track_penalty: float = -0.02
+    
+    track_step_penalty: float = -0.02
 
 
 class SearchTrackBelief20Env:
@@ -64,9 +73,27 @@ class SearchTrackBelief20Env:
         self.cfg = config or EnvConfig()
         self.rng = np.random.default_rng(self.cfg.seed)
         self.controller = controller or MissionController()
-        self.observation_shape = (5, self.cfg.grid_size, self.cfg.grid_size)
+        #self.observation_shape = (5, self.cfg.grid_size, self.cfg.grid_size)
+        self.observation_shape = (6, self.cfg.grid_size, self.cfg.grid_size)
         self.reset()
 
+    def _detect_reward(self, value: int) -> float:
+        if int(value) == 1:
+            return self.cfg.detect_value1_bonus
+        return self.cfg.detect_value2_bonus
+
+
+    def _track_progress_reward(self, value: int) -> float:
+        if int(value) == 1:
+            return self.cfg.track_progress_value1_bonus
+        return self.cfg.track_progress_value2_bonus
+
+
+    def _complete_reward(self, value: int) -> float:
+        if int(value) == 1:
+            return self.cfg.complete_value1_bonus
+        return self.cfg.complete_value2_bonus
+    
     def reset(self) -> Tuple[np.ndarray, Dict]:
         g = self.cfg.grid_size
         self.t = 0
@@ -139,6 +166,8 @@ class SearchTrackBelief20Env:
     def _low_level_step(self, primitive_action: int, mission: int):
         self.t += 1
         reward = self.cfg.step_penalty
+        if mission == TRACK:
+            reward += self.cfg.track_step_penalty
 
         if mission == TRACK and not self._has_known_uncompleted_target():
             reward += self.cfg.unknown_track_penalty
@@ -157,6 +186,7 @@ class SearchTrackBelief20Env:
             reward += self.cfg.revisit_penalty
 
         reward += self._observe_and_update_memory()
+        
         if mission == TRACK:
             reward += self._track_update_if_possible()
 
@@ -183,7 +213,8 @@ class SearchTrackBelief20Env:
                 if detected_now:
                     if not self.detected[i]:
                         self.detected[i] = True
-                        reward += self.cfg.detect_bonus * float(self.target_values[i])
+                        #reward += self.cfg.detect_bonus * float(self.target_values[i])
+                        reward += self._detect_reward(int(self.target_values[i]))
                     self.memory.add_or_update_target(
                         target_id=i,
                         pos=cell,
@@ -210,10 +241,13 @@ class SearchTrackBelief20Env:
         )
         i = int(candidates[0])
         self.track_progress[i] += 1
-        reward = self.cfg.track_progress_bonus * float(self.target_values[i])
+        #reward = self.cfg.track_progress_bonus * float(self.target_values[i])
+        value = int(self.target_values[i])
+        reward = self._track_progress_reward(value)
         if self.track_progress[i] >= self.cfg.track_required and not self.completed[i]:
             self.completed[i] = True
-            reward += self.cfg.complete_bonus * float(self.target_values[i])
+            #reward += self.cfg.complete_bonus * float(self.target_values[i])
+            reward += self._complete_reward(value)
         self.memory.update_target_progress(i, int(self.track_progress[i]), bool(self.completed[i]))
         return float(reward)
 
@@ -222,6 +256,11 @@ class SearchTrackBelief20Env:
         drone = np.zeros((g, g), dtype=np.float32)
         drone[tuple(self.drone_pos)] = 1.0
         known_target_value = self.memory.known_target_value_map()
+        time_remaining = np.full(
+            (g, g),
+            1.0 - float(self.t) / float(self.cfg.max_steps),
+            dtype=np.float32,
+        )
         return np.stack(
             [
                 drone,
@@ -229,11 +268,19 @@ class SearchTrackBelief20Env:
                 known_target_value,
                 self.memory.completed_map,
                 self.memory.visited,
+                time_remaining,
             ],
             axis=0,
         ).astype(np.float32)
 
     def _info(self) -> Dict:
+        completed_value = int((self.completed.astype(np.int64) * self.target_values).sum())
+
+        detected_value1 = int(((self.detected) & (self.target_values == 1)).sum())
+        detected_value2 = int(((self.detected) & (self.target_values == 2)).sum())
+
+        completed_value1 = int(((self.completed) & (self.target_values == 1)).sum())
+        completed_value2 = int(((self.completed) & (self.target_values == 2)).sum())
         return {
             "t": self.t,
             "drone_pos": self.drone_pos.copy(),
@@ -247,6 +294,12 @@ class SearchTrackBelief20Env:
             "track_progress": self.track_progress.copy(),
             "last_mission": int(self.last_mission),
             "last_primitive_actions": list(self.last_primitive_actions),
+            "completed_value": completed_value,
+            "detected_value1": detected_value1,
+            "detected_value2": detected_value2,
+            "completed_value1": completed_value1,
+            "completed_value2": completed_value2,
+            
         }
 
     def _has_known_uncompleted_target(self) -> bool:
