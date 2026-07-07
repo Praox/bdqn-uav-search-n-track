@@ -36,11 +36,14 @@ class MissionController:
         self.cfg = cfg or ControllerConfig()
 
     def act(self, mission: int, drone_pos: np.ndarray, memory: DroneMemory) -> int:
+        """
         if mission == TRACK:
             action = self._track_action(drone_pos, memory)
             if action is not None:
                 return action
         return self._search_action(drone_pos, memory)
+        """
+        return 0
 
     def _search_action(self, drone_pos: np.ndarray, memory: DroneMemory) -> int:
         best_cell = None

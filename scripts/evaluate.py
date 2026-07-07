@@ -191,11 +191,11 @@ def main() -> None:
     metrics = {
         # Main performance
         "reward_mean": safe_mean(rewards),
-        "reward_std": safe_std(rewards),
+        #"reward_std": safe_std(rewards),
         
         # Search / detection performance
         "detected_mean": safe_mean(detected),
-        "detection_rate_mean": safe_mean(detection_rates),
+        #"detection_rate_mean": safe_mean(detection_rates),
         "known_targets_mean": safe_mean(known),
 
         # Track / completion performance
@@ -217,8 +217,8 @@ def main() -> None:
         "search_when_available_ratio": search_when_available / max(1, available_track_decisions),
 
         # Timing
-        "first_detection_step_mean": safe_mean(first_detection_steps),
-        "first_completion_step_mean": safe_mean(first_completion_steps),
+        #"first_detection_step_mean": safe_mean(first_detection_steps),
+        #"first_completion_step_mean": safe_mean(first_completion_steps),
     }
 
     pprint(metrics)
