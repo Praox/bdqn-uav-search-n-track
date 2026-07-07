@@ -102,7 +102,8 @@ python scripts/train.py --episodes 500 --macro-steps 5 --sensor-radius 2
 ## Evaluate
 
 ```bash
-python scripts/evaluate.py --checkpoint runs/latest.pt --episodes 100 --macro-steps 5 --sensor-radius 2
+python scripts/evaluate.py --checkpoint runs/best.pt --episodes 500 --macro-steps 5 --sensor-radius 2
+python scripts/evaluate.py --checkpoint runs/latest.pt --episodes 500 --macro-steps 5 --sensor-radius 2
 ```
 
 ## Dans ce repo :
