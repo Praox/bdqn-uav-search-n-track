@@ -133,3 +133,33 @@ FeatureNet:
 
 BayesianLinearHead:
     donne Q_SEARCH et Q_TRACK avec incertitude bayésienne
+
+## Evaluation protocol
+
+Best trial evaluation command :
+```bash
+python scripts/evaluate.py \
+  --checkpoint runs/best.pt \
+  --episodes 500 \
+  --macro-steps 5 \
+  --sensor-radius 2 \
+  --seed 123
+  ```
+
+ Latest trial evaluation command :
+```bash
+python scripts/evaluate.py \
+  --checkpoint runs/latest.pt \
+  --episodes 500 \
+  --macro-steps 5 \
+  --sensor-radius 2 \
+  --seed 123
+  ```
+
+  model's judgeement over the six metrics:
+    completed_mean
+    detected_mean
+    track_when_available_ratio
+    track_success_rate_mean
+    sensor_coverage_ratio_mean
+    new_observed_cells_per_decision_mean
