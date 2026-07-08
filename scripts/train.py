@@ -46,6 +46,13 @@ def evaluate(agent: BDQNAgent, args, episodes: int = 20) -> dict:
             macro_steps=args.macro_steps,
             max_steps=args.max_steps,
             seed=args.seed + 10_000 + ep,
+            detect_value1_bonus=args.detect_value1_bonus,
+            detect_value2_bonus=args.detect_value2_bonus,
+            track_progress_value1_bonus=args.track_progress_value1_bonus,
+            track_progress_value2_bonus=args.track_progress_value2_bonus,
+            complete_value1_bonus=args.complete_value1_bonus,
+            complete_value2_bonus=args.complete_value2_bonus,
+            track_step_penalty=args.track_step_penalty,
         ))
 
         obs, info = env.reset()
@@ -116,6 +123,17 @@ def main() -> None:
     parser.add_argument("--lr", type=float, default=1e-4)
     parser.add_argument('--batch_size', type=int, default=64)
     
+    parser.add_argument("--detect-value1-bonus", type=float, default=0.30)
+    parser.add_argument("--detect-value2-bonus", type=float, default=1.00)
+
+    parser.add_argument("--track-progress-value1-bonus", type=float, default=0.03)
+    parser.add_argument("--track-progress-value2-bonus", type=float, default=0.12)
+
+    parser.add_argument("--complete-value1-bonus", type=float, default=2.00)
+    parser.add_argument("--complete-value2-bonus", type=float, default=8.00)
+
+    parser.add_argument("--track-step-penalty", type=float, default=-0.02)
+    
     args = parser.parse_args()
 
     random.seed(args.seed)
@@ -134,6 +152,13 @@ def main() -> None:
         macro_steps=args.macro_steps,
         max_steps=args.max_steps,
         seed=args.seed,
+        detect_value1_bonus=args.detect_value1_bonus,
+        detect_value2_bonus=args.detect_value2_bonus,
+        track_progress_value1_bonus=args.track_progress_value1_bonus,
+        track_progress_value2_bonus=args.track_progress_value2_bonus,
+        complete_value1_bonus=args.complete_value1_bonus,
+        complete_value2_bonus=args.complete_value2_bonus,
+        track_step_penalty=args.track_step_penalty,
     ))
 
     agent = BDQNAgent(BDQNConfig(

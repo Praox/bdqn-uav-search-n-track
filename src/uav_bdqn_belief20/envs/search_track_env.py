@@ -42,12 +42,13 @@ class EnvConfig:
     #complete_bonus: float = 2.00
     complete_value1_bonus: float = 2.0
     complete_value2_bonus: float = 8.0
-    
+    #for cost tracking
+    track_step_penalty: float = -0.02
     all_targets_bonus: float = 3.00
     boundary_penalty: float = -0.05
     unknown_track_penalty: float = -0.02
     
-    track_step_penalty: float = -0.02
+    
 
 
 class SearchTrackBelief20Env:
@@ -275,7 +276,8 @@ class SearchTrackBelief20Env:
 
     def _info(self) -> Dict:
         completed_value = int((self.completed.astype(np.int64) * self.target_values).sum())
-
+        detected_value = int((self.detected.astype(np.int64) * self.target_values).sum())
+        
         detected_value1 = int(((self.detected) & (self.target_values == 1)).sum())
         detected_value2 = int(((self.detected) & (self.target_values == 2)).sum())
 
@@ -289,12 +291,15 @@ class SearchTrackBelief20Env:
             "known_targets": len(self.memory.known_targets),
             "known_uncompleted": sum(1 for t in self.memory.known_targets.values() if not t.completed),
             "visited_ratio": float(self.memory.visited.mean()),
+            
             "target_values": self.target_values.copy(),
             "target_pos": self.target_pos.copy(),  # debug only; not exposed to controller or BDQN.
             "track_progress": self.track_progress.copy(),
             "last_mission": int(self.last_mission),
             "last_primitive_actions": list(self.last_primitive_actions),
+            
             "completed_value": completed_value,
+            "detected_value": detected_value,
             "detected_value1": detected_value1,
             "detected_value2": detected_value2,
             "completed_value1": completed_value1,

@@ -38,7 +38,18 @@ def main() -> None:
     p.add_argument("--max-steps", type=int, default=150)
     p.add_argument("--seed", type=int, default=123)
     args = p.parse_args()
+    p.add_argument("--detect-value1-bonus", type=float, default=0.30)
+    p.add_argument("--detect-value2-bonus", type=float, default=1.00)
 
+    p.add_argument("--track-progress-value1-bonus", type=float, default=0.03)
+    p.add_argument("--track-progress-value2-bonus", type=float, default=0.12)
+
+    p.add_argument("--complete-value1-bonus", type=float, default=2.00)
+    p.add_argument("--complete-value2-bonus", type=float, default=8.00)
+
+    p.add_argument("--track-step-penalty", type=float, default=-0.02)
+    
+    
     env0 = SearchTrackBelief20Env(EnvConfig(
         grid_size=args.grid_size,
         n_value1_targets=args.n_value1_targets,
@@ -48,6 +59,13 @@ def main() -> None:
         macro_steps=args.macro_steps,
         max_steps=args.max_steps,
         seed=args.seed,
+        detect_value1_bonus=args.detect_value1_bonus,
+        detect_value2_bonus=args.detect_value2_bonus,
+        track_progress_value1_bonus=args.track_progress_value1_bonus,
+        track_progress_value2_bonus=args.track_progress_value2_bonus,
+        complete_value1_bonus=args.complete_value1_bonus,
+        complete_value2_bonus=args.complete_value2_bonus,
+        track_step_penalty=args.track_step_penalty,
     ))
 
     device = pick_device()
@@ -64,6 +82,14 @@ def main() -> None:
     completed = []
     known = []
     visited_ratio = []
+    detected_value = []
+    completed_value = []
+
+    detected_value1 = []
+    detected_value2 = []
+
+    completed_value1 = []
+    completed_value2 = []
 
     search = 0
     track = 0
@@ -163,6 +189,15 @@ def main() -> None:
         completed.append(info["completed"])
         known.append(info["known_targets"])
         visited_ratio.append(float(env.memory.visited.mean()))
+        
+        detected_value.append(info["detected_value"])
+        completed_value.append(info["completed_value"])
+
+        detected_value1.append(info["detected_value1"])
+        detected_value2.append(info["detected_value2"])
+
+        completed_value1.append(info["completed_value1"])
+        completed_value2.append(info["completed_value2"])
 
         first_detection_steps.append(
             ep_first_detection_step if ep_first_detection_step is not None else args.max_steps
@@ -216,6 +251,17 @@ def main() -> None:
         "track_when_available_ratio": track_when_available / max(1, available_track_decisions),
         "search_when_available_ratio": search_when_available / max(1, available_track_decisions),
 
+        "detected_value_mean": safe_mean(detected_value),
+        "completed_value_mean": safe_mean(completed_value),
+
+        "detected_value1_mean": safe_mean(detected_value1),
+        "detected_value2_mean": safe_mean(detected_value2),
+
+        "completed_value1_mean": safe_mean(completed_value1),
+        "completed_value2_mean": safe_mean(completed_value2),
+
+        "value2_detection_rate": safe_mean(detected_value2) / max(1, args.n_value2_targets),
+        "value2_completion_rate": safe_mean(completed_value2) / max(1, args.n_value2_targets),
         # Timing
         #"first_detection_step_mean": safe_mean(first_detection_steps),
         #"first_completion_step_mean": safe_mean(first_completion_steps),

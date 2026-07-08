@@ -22,6 +22,15 @@ def evaluate_policy(policy_name: str, args) -> dict:
     coverage = []
     new_observed_cells_per_decision = []
 
+    detected_value = []
+    completed_value = []
+
+    detected_value1 = []
+    detected_value2 = []
+
+    completed_value1 = []
+    completed_value2 = []
+    
     search = 0
     track = 0
     decisions = 0
@@ -47,6 +56,13 @@ def evaluate_policy(policy_name: str, args) -> dict:
             macro_steps=args.macro_steps,
             max_steps=args.max_steps,
             seed=args.seed + ep,
+            detect_value1_bonus=args.detect_value1_bonus,
+            detect_value2_bonus=args.detect_value2_bonus,
+            track_progress_value1_bonus=args.track_progress_value1_bonus,
+            track_progress_value2_bonus=args.track_progress_value2_bonus,
+            complete_value1_bonus=args.complete_value1_bonus,
+            complete_value2_bonus=args.complete_value2_bonus,
+            track_step_penalty=args.track_step_penalty,
         ))
 
         obs, info = env.reset()
@@ -117,6 +133,14 @@ def evaluate_policy(policy_name: str, args) -> dict:
         completed.append(info["completed"])
         known.append(info["known_targets"])
         coverage.append(float(env.memory.visited.mean()))
+        detected_value.append(info["detected_value"])
+        completed_value.append(info["completed_value"])
+
+        detected_value1.append(info["detected_value1"])
+        detected_value2.append(info["detected_value2"])
+
+        completed_value1.append(info["completed_value1"])
+        completed_value2.append(info["completed_value2"])
 
         new_observed_cells_per_decision.append(
             ep_new_observed_cells / max(1, ep_decisions)
@@ -142,6 +166,18 @@ def evaluate_policy(policy_name: str, args) -> dict:
         "completion_rate_mean": safe_mean([x / max(1, n_total_targets) for x in completed]),
 
         "known_targets_mean": safe_mean(known),
+        
+        "detected_value_mean": safe_mean(detected_value),
+        "completed_value_mean": safe_mean(completed_value),
+
+        "detected_value1_mean": safe_mean(detected_value1),
+        "detected_value2_mean": safe_mean(detected_value2),
+
+        "completed_value1_mean": safe_mean(completed_value1),
+        "completed_value2_mean": safe_mean(completed_value2),
+
+        "value2_detection_rate": safe_mean(detected_value2) / max(1, args.n_value2_targets),
+        "value2_completion_rate": safe_mean(completed_value2) / max(1, args.n_value2_targets),
 
         "track_success_rate_mean": safe_mean([
             c / max(1, k)
@@ -160,6 +196,8 @@ def evaluate_policy(policy_name: str, args) -> dict:
 
         "first_detection_step_mean": safe_mean(first_detection_steps),
         "first_completion_step_mean": safe_mean(first_completion_steps),
+        
+        
     }
 
 
@@ -180,6 +218,17 @@ def main() -> None:
     p.add_argument("--seed", type=int, default=123)
     p.add_argument("--run-dir", type=str, default="runs")
     
+    p.add_argument("--detect-value1-bonus", type=float, default=0.30)
+    p.add_argument("--detect-value2-bonus", type=float, default=1.00)
+
+    p.add_argument("--track-progress-value1-bonus", type=float, default=0.03)
+    p.add_argument("--track-progress-value2-bonus", type=float, default=0.12)
+
+    p.add_argument("--complete-value1-bonus", type=float, default=2.00)
+    p.add_argument("--complete-value2-bonus", type=float, default=8.00)
+
+    p.add_argument("--track-step-penalty", type=float, default=-0.02)
+        
     args = p.parse_args()
 
     policies = (
