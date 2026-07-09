@@ -37,7 +37,7 @@ def main() -> None:
     p.add_argument("--macro-steps", type=int, default=5)
     p.add_argument("--max-steps", type=int, default=150)
     p.add_argument("--seed", type=int, default=123)
-    args = p.parse_args()
+    
     p.add_argument("--detect-value1-bonus", type=float, default=0.30)
     p.add_argument("--detect-value2-bonus", type=float, default=1.00)
 
@@ -49,7 +49,8 @@ def main() -> None:
 
     p.add_argument("--track-step-penalty", type=float, default=-0.02)
     
-    
+    args = p.parse_args()
+
     env0 = SearchTrackBelief20Env(EnvConfig(
         grid_size=args.grid_size,
         n_value1_targets=args.n_value1_targets,
@@ -59,6 +60,7 @@ def main() -> None:
         macro_steps=args.macro_steps,
         max_steps=args.max_steps,
         seed=args.seed,
+
         detect_value1_bonus=args.detect_value1_bonus,
         detect_value2_bonus=args.detect_value2_bonus,
         track_progress_value1_bonus=args.track_progress_value1_bonus,
@@ -125,6 +127,14 @@ def main() -> None:
             macro_steps=args.macro_steps,
             max_steps=args.max_steps,
             seed=args.seed + ep,
+
+            detect_value1_bonus=args.detect_value1_bonus,
+            detect_value2_bonus=args.detect_value2_bonus,
+            track_progress_value1_bonus=args.track_progress_value1_bonus,
+            track_progress_value2_bonus=args.track_progress_value2_bonus,
+            complete_value1_bonus=args.complete_value1_bonus,
+            complete_value2_bonus=args.complete_value2_bonus,
+            track_step_penalty=args.track_step_penalty,
         ))
 
         obs, info = env.reset()

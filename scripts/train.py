@@ -27,6 +27,9 @@ def evaluate(agent: BDQNAgent, args, episodes: int = 20) -> dict:
     completed = []
     known = []
     coverage = []
+    detected_value = []
+    completed_value = []
+    completed_value2 = []
 
     search = 0
     track = 0
@@ -92,6 +95,10 @@ def evaluate(agent: BDQNAgent, args, episodes: int = 20) -> dict:
         known.append(info["known_targets"])
         coverage.append(float(env.memory.visited.mean()))
 
+        detected_value.append(info["detected_value"])
+        completed_value.append(info["completed_value"])
+        completed_value2.append(info["completed_value2"])
+
     return {
         "eval_reward": float(np.mean(vals)),
         "eval_detected": float(np.mean(detected)),
@@ -103,6 +110,10 @@ def evaluate(agent: BDQNAgent, args, episodes: int = 20) -> dict:
         "track_available_decisions": int(available_track_decisions),
         "track_when_available_ratio": track_when_available / max(1, available_track_decisions),
         "search_when_available_ratio": search_when_available / max(1, available_track_decisions),
+        "eval_detected_value": float(np.mean(detected_value)),
+        "eval_completed_value": float(np.mean(completed_value)),
+        "eval_completed_value2": float(np.mean(completed_value2)),
+        "eval_value2_completion_rate": float(np.mean(completed_value2)) / max(1, args.n_value2_targets),
     }
 
 
@@ -223,6 +234,8 @@ def main() -> None:
 
         if (ep + 1) % 100 == 0:
             metrics = evaluate(agent, args, episodes=args.eval_episodes)
+            if not np.isfinite(metrics["eval_completed_value"]):
+                raise RuntimeError(f"Invalid eval metrics: {metrics}")
             print(f"\n[Eval {ep + 1}] {metrics}")
 
             # Always save latest.
@@ -232,8 +245,8 @@ def main() -> None:
             # Completion is weighted because the task is not only detection.
             score = (
                 metrics["eval_reward"]
-                + 2.0 * metrics["eval_completed"]
-                + 1.0 * metrics["eval_detected"]
+                + 2.0 * metrics["eval_completed_value"]
+                + 3.0 * metrics["eval_completed_value2"]
             )
 
             if score > best_score:
@@ -245,7 +258,7 @@ def main() -> None:
     agent.save(str(run_dir / "latest.pt"))
 
     print("Training complete.")
-    print(f"Best checkpoint: runs/best.pt from episode {best_ep} with score={best_score:.3f}")
+    print(f"Best checkpoint: {run_dir / 'best.pt'} from episode {best_ep} with score={best_score:.3f}")
 
 
 if __name__ == "__main__":
