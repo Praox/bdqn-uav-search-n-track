@@ -18,7 +18,7 @@ class BDQNConfig:
     gamma: float = 0.99
     lr: float = 1e-4
     batch_size: int = 64
-    replay_capacity: int = 50_000
+    replay_capacity: int = 50000
     target_update_period: int = 500
     posterior_update_period: int = 100
     blr_lambda: float = 1.0
